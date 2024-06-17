@@ -1,0 +1,91 @@
+#include <Servo.h> 
+#include "SharpIR.h"
+int servoPin = 5; 
+int trigPin=3;
+int echoPin=4;
+Servo Servo1; 
+int LEDPin=10;
+int buzzer=11;
+
+
+#define IRPin A0
+#define model 1080
+int distance_cm;
+SharpIR mySensor = SharpIR(IRPin, model);
+float duration, distance; // Duration used to calculate distance
+
+#define Threshold 1
+
+#define MQ2pin 8
+float sensorValue;
+
+
+void setup() 
+{
+ Serial.begin (9600);
+ pinMode(trigPin, OUTPUT);
+ pinMode(echoPin, INPUT);
+ Servo1.attach(servoPin);
+pinMode(LEDPin, OUTPUT); // Use LED indicator (if required)
+pinMode(buzzer, OUTPUT);
+}
+
+void loop() 
+{
+  digitalWrite(trigPin, LOW); 
+  delay(2); 
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10); 
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration/58.2;
+  
+  Servo1.write(0);
+  distance_cm = mySensor.distance();
+
+  
+if (distance <=20)
+  {
+    Serial.print(" FOR DISTANCE = : ");
+     Serial.print(distance);
+     Serial.println("cm");
+     Servo1.write(90);
+     
+  }
+ 
+  
+  if (distance >20)
+  {
+    Serial.print(" FOR DISTANCE = : ");
+    Serial.print(distance);
+    Serial.println("cm");
+    Servo1.write(0);
+    // digitalWrite(LEDPin, LOW);
+  }
+  
+  delay(500);
+  Serial.print("Dustbin level: ");
+  Serial.print(distance_cm);
+  Serial.println(" cm");
+
+  if (distance_cm <=13)
+  digitalWrite(LEDPin, HIGH);
+   else {
+         digitalWrite(LEDPin, LOW);
+   }
+      sensorValue = digitalRead(MQ2pin);
+  Serial.print("Sensor Value: ");
+  Serial.print(sensorValue);
+   if(sensorValue == Threshold)
+   {
+   digitalWrite(buzzer,HIGH);
+  Serial.print(" | badsmell detected!");
+   Serial.println("");
+  }
+ else{
+     digitalWrite(buzzer,LOW);
+ }
+
+  
+
+}
